@@ -176,3 +176,16 @@ data_marj
     ##  9 Alabama 18+   2013-2014    9.99
     ## 10 Alabama 18+   2014-2015    9.59
     ## # … with 500 more rows
+
+## NSDUH – factors
+
+``` r
+data_marj %>% 
+  filter(age == "12-17") %>% 
+  mutate(State = fct_reorder(State, percent)) %>% 
+  ggplot(aes(State, y = percent, color = year)) +
+  geom_point()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+<img src="Strings_and_Factors_files/figure-gfm/unnamed-chunk-11-1.png" width="90%" />
