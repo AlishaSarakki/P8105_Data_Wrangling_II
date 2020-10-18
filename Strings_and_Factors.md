@@ -126,3 +126,53 @@ as.numeric(factor_vec)
 ```
 
     ## [1] 1 1 2 2
+
+## NSDUH
+
+``` r
+nsduh_url = "http://samhda.s3-us-gov-west-1.amazonaws.com/s3fs-public/field-uploads/2k15StateFiles/NSDUHsaeShortTermCHG2015.htm"
+
+table_marj = 
+  read_html(nsduh_url) %>% 
+  html_nodes(css = "table") %>% 
+  first() %>%
+  html_table() %>%
+  slice(-1) %>%
+  as_tibble() 
+```
+
+``` r
+data_marj = 
+  table_marj %>% 
+  select(-contains("P Value")) %>% 
+  pivot_longer(
+    -State,
+    names_to = "age_year",
+    values_to = "percent"
+  ) %>% 
+  separate(age_year, into = c("age", "year"), sep = "\\(",
+           ) %>% 
+ # trim the parenthesis off
+   mutate(
+    year = str_replace(year, "\\)", ""),
+    percent = str_replace(percent, "[a-c]$", ""),
+    percent = as.numeric(percent)
+  ) %>% 
+  filter(!(State %in% c("Total U.S.", "Northeast", "Midwest", "South", "West")))
+data_marj
+```
+
+    ## # A tibble: 510 x 4
+    ##    State   age   year      percent
+    ##    <chr>   <chr> <chr>       <dbl>
+    ##  1 Alabama 12+   2013-2014    9.98
+    ##  2 Alabama 12+   2014-2015    9.6 
+    ##  3 Alabama 12-17 2013-2014    9.9 
+    ##  4 Alabama 12-17 2014-2015    9.71
+    ##  5 Alabama 18-25 2013-2014   27.0 
+    ##  6 Alabama 18-25 2014-2015   26.1 
+    ##  7 Alabama 26+   2013-2014    7.1 
+    ##  8 Alabama 26+   2014-2015    6.81
+    ##  9 Alabama 18+   2013-2014    9.99
+    ## 10 Alabama 18+   2014-2015    9.59
+    ## # … with 500 more rows
